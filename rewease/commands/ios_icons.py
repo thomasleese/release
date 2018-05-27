@@ -77,7 +77,7 @@ class IosIconsGenerator:
             'info': self.INFO,
         }
 
-    def save_png(self, size, scale, parent_size = 500):
+    def save_png(self, size, scale, parent_size = 1024):
         filename = f'icon-{size}@{scale}.png'
         output_path = str(self.output_folder / filename)
 

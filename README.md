@@ -12,4 +12,5 @@ _Insert picture of mascot here._
 $ rewease ios-icons <path/to/svg> <path/to/output.appicons>
 ```
 
-Generates a `.appicons` folder for application icons from an SVG file.
+Generates a `.appicons` folder for application icons from an SVG file. Expects
+the input file to be 1024x1024.
