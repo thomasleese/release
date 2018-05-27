@@ -1,8 +1,9 @@
 from collections import namedtuple
 import json
 from pathlib import Path
+import subprocess
 
-import cairosvg
+from cairosvg import svg2png
 
 
 class IosIconsGenerator:
@@ -33,10 +34,8 @@ class IosIconsGenerator:
     """
 
     INFO = {
-        "info" : {
-            "version" : 1,
-            "author" : "xcode",
-        },
+        "version" : 1,
+        "author" : "xcode",
     }
     """
     INFO is the dictionary that appears at the end of the JSON output from this
@@ -54,7 +53,7 @@ class IosIconsGenerator:
         path = self.output_folder / 'Contents.json'
         config = self.build_contents_json_dictionary()
         with path.open('w') as file:
-            file.write(json.dumps(config))
+            file.write(json.dumps(config, sort_keys=True, indent=2))
 
     def build_images_dictionary(self):
         config = []
@@ -77,24 +76,43 @@ class IosIconsGenerator:
             'info': self.INFO,
         }
 
-    def save_png(self, size, scale, parent_size = 1024):
-        filename = f'icon-{size}@{scale}.png'
-        output_path = str(self.output_folder / filename)
-
-        print(output_path)
-
+    def export_svg(self, path, size, scale, parent_size):
         output_scale = size / parent_size * scale
 
-        cairosvg.svg2png(
+        svg2png(
             url=self.input_file,
-            write_to=output_path,
+            write_to=path,
             parent_width=parent_size,
             parent_height=parent_size,
             scale=output_scale,
         )
 
-        # PNGQUANT
-        # Remove alpha channel
+    def remove_alpha_channel(self, path):
+        args = ['convert', path, '-alpha', 'off', path]
+        subprocess.run(args, check=True)
+
+    def compress_image(self, path):
+        args = [
+            'pngquant',
+            '--quality=40-75',
+            '--speed=1',
+            '--force',
+            '--strip',
+            '--output', path,
+            '--', path,
+        ]
+
+        subprocess.run(args, check=True)
+
+    def save_png(self, size, scale, parent_size = 1024):
+        filename = f'icon-{size}@{scale}.png'
+        output_path = str(self.output_folder / filename)
+
+        print(filename)
+
+        self.export_svg(output_path, size, scale, parent_size)
+        self.remove_alpha_channel(output_path)
+        self.compress_image(output_path)
 
         return filename
 
