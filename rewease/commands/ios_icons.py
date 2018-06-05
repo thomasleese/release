@@ -94,7 +94,7 @@ class IosIconsGenerator:
     def compress_image(self, path):
         args = [
             'pngquant',
-            '--quality=40-75',
+            '--quality=60-80',
             '--speed=1',
             '--force',
             '--strip',
